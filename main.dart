@@ -1,115 +1,101 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyQuizApp());
+  runApp(MyApp());
 }
 
-class MyQuizApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: QuizScreen(),
+      title: 'To-Do List App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: ToDoListScreen(),
     );
   }
 }
 
-class QuizScreen extends StatefulWidget {
+class ToDoListScreen extends StatefulWidget {
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  _ToDoListScreenState createState() => _ToDoListScreenState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
-  int currentQuestionIndex = 0;
-  int score = 0;
-
-  List<Map<String, dynamic>> questions = [
-    {
-      'question': 'What is the capital of France?',
-      'options': ['Berlin', 'Madrid', 'Paris', 'Rome'],
-      'correctAnswer': 'Paris',
-    },
-    {
-      'question': 'Which programming language is Flutter based on?',
-      'options': ['Java', 'Dart', 'Swift', 'Kotlin'],
-      'correctAnswer': 'Dart',
-    },
-    // Add more questions as needed
-  ];
-
-  void checkAnswer(String selectedAnswer) {
-    String correctAnswer = questions[currentQuestionIndex]['correctAnswer'];
-    if (selectedAnswer == correctAnswer) {
-      setState(() {
-        score++;
-      });
-    }
-    moveToNextQuestion();
-  }
-
-  void moveToNextQuestion() {
-    if (currentQuestionIndex < questions.length - 1) {
-      setState(() {
-        currentQuestionIndex++;
-      });
-    } else {
-      // End of the quiz
-      showResultDialog();
-    }
-  }
-
-  void showResultDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Quiz Completed'),
-          content: Text('Your score: $score/${questions.length}'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+class _ToDoListScreenState extends State<ToDoListScreen> {
+  List<String> tasks = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quiz App'),
+        title: Text('To-Do List'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Question ${currentQuestionIndex + 1}:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(tasks[index]),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () {
+                      setState(() {
+                        tasks.removeAt(index);
+                      });
+                    },
+                  ),
+                );
+              },
             ),
-            SizedBox(height: 8),
-            Text(
-              questions[currentQuestionIndex]['question'],
-              style: TextStyle(fontSize: 16),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                _addTask(context);
+              },
+              child: Text('Add Task'),
             ),
-            SizedBox(height: 16),
-            // Display options as buttons
-            ...(questions[currentQuestionIndex]['options'] as List<String>).map((option) {
-              return ElevatedButton(
-                onPressed: () {
-                  checkAnswer(option);
-                },
-                child: Text(option),
-              );
-            }).toList(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
+
+  void _addTask(BuildContext context) async {
+    String task = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Task'),
+          content: TextField(
+            onChanged: (value) {},
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (task != null && task.isNotEmpty) {
+      setState(() {
+        tasks.add(task);
+      });
+    }
   }
 }
